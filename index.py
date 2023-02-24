@@ -13,7 +13,7 @@ from collections import namedtuple
 HostInfo = namedtuple(field_names='cert hostname peername', typename='HostInfo')
 
 HOSTS = [
-    ('sochisi.cl', 443),
+    ('whilolab.cl', 443),
 ]
 
 def verify_cert(cert, hostname):
