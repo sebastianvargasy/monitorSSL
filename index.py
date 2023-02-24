@@ -1,5 +1,4 @@
-import ssl
-import socket
+import requests
 from datetime import datetime
 import streamlit as st
 
@@ -11,16 +10,15 @@ def leer_webs():
 # Función para verificar el certificado SSL de un sitio web
 def verificar_certificado(url):
     try:
-        cert = ssl.get_server_certificate((url, 443))
-        x509 = ssl.PEM_cert_to_X509(cert)
-        expira = x509.get_notAfter().decode("ascii")
-        expira = datetime.strptime(expira, '%Y%m%d%H%M%SZ')
+        res = requests.get(url)
+        expira = res.headers['Expires']
+        expira = datetime.strptime(expira, '%a, %d %b %Y %H:%M:%S %Z')
         dias_restantes = (expira - datetime.now()).days
         return {
             'url': url,
             'expira_en': dias_restantes
         }
-    except (ssl.CertificateError, ssl.SSLError, socket.gaierror):
+    except requests.exceptions.RequestException:
         return {
             'url': url,
             'expira_en': 'No se pudo verificar'
@@ -34,3 +32,4 @@ if __name__ == '__main__':
     for web in webs:
         resultados.append(verificar_certificado(web))
     st.table(resultados)
+
