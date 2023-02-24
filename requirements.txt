@@ -1,0 +1,11 @@
+certifi
+charset-normalizer
+elasticsearch
+idna
+numpy
+python-dateutil
+pytz
+requests
+six
+streamlit
+urllib3
