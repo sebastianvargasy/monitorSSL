@@ -1,3 +1,5 @@
 cryptography==36.0.1
 idna==3.4
-pyopenssl==21.0.0
+pandas==1.4.0
+pyOpenSSL==21.0.0
+streamlit==1.1.0
