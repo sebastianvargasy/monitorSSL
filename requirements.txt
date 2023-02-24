@@ -9,3 +9,5 @@ requests
 six
 streamlit
 urllib3
+socket
+ssl
