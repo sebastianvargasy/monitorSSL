@@ -1,12 +1,9 @@
-
-# -*- encoding: utf-8 -*-
-# requires a recent enough python with idna support in socket
-# pyopenssl, cryptography and idna
-
+import pandas as pd
 from OpenSSL import SSL
 from cryptography import x509
 from cryptography.x509.oid import NameOID
 import idna
+import streamlit as st
 
 from socket import socket
 from collections import namedtuple
@@ -14,8 +11,12 @@ from collections import namedtuple
 HostInfo = namedtuple(field_names='cert hostname peername', typename='HostInfo')
 
 HOSTS = [
-    ('sochisi.cl', 443),
-    ('whilolab.cl', 443),
+    ('damjan.softver.org.mk', 443),
+    ('expired.badssl.com', 443),
+    ('wrong.host.badssl.com', 443),
+    ('ca.ocsr.nl', 443),
+    ('faß.de', 443),
+    ('самодеј.мкд', 443),
 ]
 
 def verify_cert(cert, hostname):
@@ -67,31 +68,25 @@ def get_issuer(cert):
         return None
 
 
-def print_basic_info(hostinfo):
-    s = '''» {hostname} « … {peername}
-    \tcommonName: {commonname}
-    \tSAN: {SAN}
-    \tissuer: {issuer}
-    \tnotBefore: {notbefore}
-    \tnotAfter:  {notafter}
-    '''.format(
-            hostname=hostinfo.hostname,
-            peername=hostinfo.peername,
-            commonname=get_common_name(hostinfo.cert),
-            SAN=get_alt_names(hostinfo.cert),
-            issuer=get_issuer(hostinfo.cert),
-            notbefore=hostinfo.cert.not_valid_before,
-            notafter=hostinfo.cert.not_valid_after
-    )
-    print(s)
+def get_basic_info(hostinfo):
+    s = {
+        'hostname': hostinfo.hostname,
+        'peername': hostinfo.peername,
+        'commonname': get_common_name(hostinfo.cert),
+        'SAN': get_alt_names(hostinfo.cert),
+        'issuer': get_issuer(hostinfo.cert),
+        'notbefore': hostinfo.cert.not_valid_before,
+        'notafter': hostinfo.cert.not_valid_after
+    }
+    return s
 
-def check_it_out(hostname, port):
-    hostinfo = get_certificate(hostname, port)
-    print_basic_info(hostinfo)
-
-
-import concurrent.futures
 if __name__ == '__main__':
-    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as e:
-        for hostinfo in e.map(lambda x: get_certificate(x[0], x[1]), HOSTS):
-            print_basic_info(hostinfo)
+    # Crear la aplicación Streamlit
+    st.title("Verificación de certificados SSL")
+    resultados = []
+    for host in HOSTS:
+        hostinfo = get_certificate(host[0], host[1])
+        resultados.append(get_basic_info(hostinfo))
+    df = pd.DataFrame(resultados)
+    st.dataframe(df)
+
