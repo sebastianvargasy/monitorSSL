@@ -2,12 +2,13 @@ import ssl
 import socket
 from datetime import datetime
 import streamlit as st
+import OpenSSL.crypto
 
 # Función para verificar el certificado SSL de un sitio web
 def verificar_certificado(url):
     try:
         cert = ssl.get_server_certificate((url, 443))
-        x509 = ssl.PEM_cert_to_X509(cert)
+        x509 = OpenSSL.crypto.load_certificate(OpenSSL.crypto.FILETYPE_PEM, cert)
         expira = x509.get_notAfter().decode("ascii")
         expira = datetime.strptime(expira, '%Y%m%d%H%M%SZ')
         dias_restantes = (expira - datetime.now()).days
@@ -35,4 +36,5 @@ if url:
     st.write('El certificado SSL para', url, 'expira en', resultado['expira_en'], 'días')
     st.write('Resultados:')
     st.table([resultado])
+
 
